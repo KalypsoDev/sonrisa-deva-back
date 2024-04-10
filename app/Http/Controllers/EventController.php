@@ -32,7 +32,7 @@ class EventController extends Controller
                 // 'public_id' => 'required|string',
                 'description' => 'nullable|string',
                 'location' => 'required|string',
-                'collection' => 'nullable|double',
+                'collection' => 'nullable|numeric',
                 'start_date' => 'required|date',
             ]);
 
@@ -80,7 +80,7 @@ class EventController extends Controller
                 // 'public_id' => 'required|string',
                 'description' => 'nullable|string',
                 'location' => 'required|string',
-                'collection' => 'nullable|double',
+                'collection' => 'nullable|numeric',
                 'start_date' => 'required|date',
             ]);
 
