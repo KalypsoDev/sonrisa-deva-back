@@ -59,12 +59,18 @@ class EventController extends Controller
      */
     public function show(string $id)
     {
-        $event = Event::find($id);
-
-        if (!$event) {
-            return response()->json(['error' => 'No se ha encontrado el evento',], 404);
+        try {
+            $event = Event::find($id);
+        
+            if (!$event) {
+                return response()->json(['error' => 'No se ha encontrado el evento'], 404);
+            }
+        
+            return response()->json(['data' => $event], 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Se produjo un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
-        return response()->json(['data' => $event,], 200);
+        
     }
 
     /**
