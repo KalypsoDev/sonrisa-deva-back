@@ -17,8 +17,8 @@ return new class extends Migration
             $table->string('description')->nullable();
             $table->double('price', 8, 2);
             $table->integer('stock');
-            $table->string('image_url');
-            $table->string('public_id');
+            $table->string('image_url')->nullable();
+            $table->string('public_id')->nullable();
             $table->timestamps();
         });
     }
