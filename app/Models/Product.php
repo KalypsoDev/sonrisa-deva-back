@@ -10,4 +10,9 @@ class Product extends Model
     use HasFactory;
 
     protected $guarded =  [];
+
+    public function ordersProducts()
+    {
+        return $this->belongsToMany(OrderProduct::class);
+    }
 }
