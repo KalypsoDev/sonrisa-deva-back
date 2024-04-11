@@ -112,7 +112,7 @@ class EventController extends Controller
 
             $event->delete();
 
-            return response()->json(['message' => 'Producto eliminado correctamente'], 200);
+            return response()->json(['message' => 'Evento eliminado correctamente'], 200);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
