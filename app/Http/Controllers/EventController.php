@@ -32,6 +32,8 @@ class EventController extends Controller
                 // 'public_id' => 'required|string',
                 'location' => 'required|string',
                 'collection' => 'nullable|numeric',
+                'date' => 'nullable|date',
+                'hour' => 'nullable|date_format:H:i'
             ]);
 
             $event = Event::create([
@@ -40,6 +42,8 @@ class EventController extends Controller
                 // 'public_id' => $request->public_id,
                 'location' => $request->location,
                 'collection' => $request->collection,
+                'date' => $request->date,
+                'hour' => $request['hour'],
             ]);
             return response()->json([
                 'message' => 'El evento se ha creado correctamente',
@@ -57,16 +61,15 @@ class EventController extends Controller
     {
         try {
             $event = Event::find($id);
-        
+
             if (!$event) {
                 return response()->json(['error' => 'No se ha encontrado el evento'], 404);
             }
-        
+
             return response()->json(['data' => $event], 200);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Se produjo un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
-        
     }
 
     /**
@@ -83,7 +86,8 @@ class EventController extends Controller
                 'description' => 'nullable|string',
                 'location' => 'required|string',
                 'collection' => 'nullable|numeric',
-                'start_date' => 'required|date',
+                'date' => 'nullable|date',
+                'time' => 'nullable|time',
             ]);
 
             $event->update($request->all());
