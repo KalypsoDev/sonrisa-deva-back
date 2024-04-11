@@ -18,7 +18,8 @@ return new class extends Migration
             $table->string('public_id')->nullable();
             $table->string('location');
             $table->double('collection', 8, 2)->nullable();
-            $table->date('start_date');
+            $table->date('date')->nullable();
+            $table->time('hour')->nullable();
             $table->timestamps();
         });
     }
