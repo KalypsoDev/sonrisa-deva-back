@@ -67,37 +67,61 @@ class OrderController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
-{
-    try {
-        $order = Order::findOrFail($id);
-
-        // Solo continuar si el status es diferente de 'preparing' para evitar deducir stock múltiples veces.
-        if ($order->status !== 'preparing' && $request->input('status') === 'preparing') {
-            foreach ($order->productOrders as $productOrder) {
-                if ($productOrder->product->stock < $productOrder->unit_quantity) {
-                    return response()->json(['error' => 'No hay suficiente stock para completar este pedido'], 400);
+    public function updateShipped(Request $request, string $id)
+    {
+        try {
+            $order = Order::findOrFail($id);
+    
+            // Verificar si el estado se está actualizando a 'shipped' y no estaba en 'shipped' antes.
+            if ($order->status !== 'shipped' && $request->input('status') === 'shipped') {
+                foreach ($order->productOrders as $productOrder) {
+                    if ($productOrder->product->stock < $productOrder->unit_quantity) {
+                        return response()->json(['error' => 'No hay suficiente stock para completar este pedido'], 400);
+                    }
+    
+                    // Restar la cantidad del stock del producto
+                    $productOrder->product->decrement('stock', $productOrder->unit_quantity);
                 }
-                $productOrder->product->decrement('stock', $productOrder->unit_quantity);
+                // Actualizar el estado de la orden
+                $order->status = $request->input('status');
+                $order->save();
+        
+                return response()->json(['success' => 'El estado del pedido se ha actualizado correctamente'], 200);
+            } else {
+                return response()->json(['failure' => 'El estado del pedido no ha podido ser actualizado'], 405);
             }
+    
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Ha ocurrido un error al actualizar el estado del pedido. Detalles: ' . $e->getMessage()], 500);
         }
-
-        // Actualizar el estado de la orden
-        $order->update([
-            'status' => $request->input('status'),
-        ]);
-
-        return response()->json(['success' => 'El estado del pedido se ha actualizado correctamente'], 200);
-    } catch (\Exception $e) {
-        return response()->json(['error' => 'Ha ocurrido un error al actualizar el estado del pedido. Detalles: ' . $e->getMessage()], 500);
     }
-}
+
+    public function updateCancelled(Request $request, string $id)
+    {
+        try {
+            $order = Order::findOrFail($id);
+
+            if ($order->status === 'preparing' && $request->input('status') === 'cancelled') {
+
+                // Actualizar el estado de la orden
+                $order->update([
+                    'status' => $request->input('status'),
+                ]);
+
+                return response()->json(['success' => 'El estado del pedido ha pasado a cancelado'], 200);
+            } else {
+                return response()->json(['failure' => 'El estado del pedido no ha podido ser actualizado'], 405);
+            }
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Ha ocurrido un error al actualizar el estado del pedido. Detalles: ' . $e->getMessage()], 500);
+        }
+    }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
-    {
-        //
-    }
+    // public function destroy(string $id)
+    // {
+    //     //
+    // }
 }
