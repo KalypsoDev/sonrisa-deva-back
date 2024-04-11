@@ -25,7 +25,25 @@ class OrderController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        try {
+            $request->validate([
+                'customer_id' => 'required|exists:customers,id',
+                'status' => 'required|in:preparing',
+                'requested_date' => 'required|string',
+            ]);
+
+            $order = Order::create([
+                'customer_id' => $request->customer_id,
+                'status' => $request->status,
+                'requested_date' => now(),
+            ]);
+            return response()->json([
+                'message' => 'El pedido se ha creado correctamente',
+                'order' => $order,
+            ], 201);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
     /**
