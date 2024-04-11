@@ -11,6 +11,8 @@ class OrderProduct extends Model
 
     protected $guarded =  [];
 
+    protected $table = 'orders_products';
+
     public function orders()
     {
         return $this->belongsTo(Order::class);
