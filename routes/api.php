@@ -48,6 +48,6 @@ Route::post('/orders', [OrderController::class, 'store']);
 Route::put('/orders/shipped', [OrderController::class, 'updateShipped']);
 Route::put('/orders/cancelled', [OrderController::class, 'updateCancelled']);
 
-Route::get('/order-product', [OrderProductController::class, 'index']);
-Route::get('/order-product/{id}', [OrderProductController::class, 'show']);
-Route::post('/order-product', [OrderProductController::class, 'store']);
+Route::get('/order-products', [OrderProductController::class, 'index']);
+Route::get('/order-products/{id}', [OrderProductController::class, 'show']);
+Route::post('/order-products', [OrderProductController::class, 'store']);
