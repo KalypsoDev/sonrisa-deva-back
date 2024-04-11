@@ -53,11 +53,11 @@ class OrderController extends Controller
     {
         try {
             $order = Order::find($id);
-        
+
             if (!$order) {
                 return response()->json(['error' => 'No se ha encontrado el pedido'], 404);
             }
-        
+
             return response()->json(['data' => $order], 200);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Se produjo un error al procesar la solicitud: ' . $e->getMessage()], 500);
@@ -68,9 +68,30 @@ class OrderController extends Controller
      * Update the specified resource in storage.
      */
     public function update(Request $request, string $id)
-    {
-        //
+{
+    try {
+        $order = Order::findOrFail($id);
+
+        // Solo continuar si el status es diferente de 'preparing' para evitar deducir stock múltiples veces.
+        if ($order->status !== 'preparing' && $request->input('status') === 'preparing') {
+            foreach ($order->productOrders as $productOrder) {
+                if ($productOrder->product->stock < $productOrder->unit_quantity) {
+                    return response()->json(['error' => 'No hay suficiente stock para completar este pedido'], 400);
+                }
+                $productOrder->product->decrement('stock', $productOrder->unit_quantity);
+            }
+        }
+
+        // Actualizar el estado de la orden
+        $order->update([
+            'status' => $request->input('status'),
+        ]);
+
+        return response()->json(['success' => 'El estado del pedido se ha actualizado correctamente'], 200);
+    } catch (\Exception $e) {
+        return response()->json(['error' => 'Ha ocurrido un error al actualizar el estado del pedido. Detalles: ' . $e->getMessage()], 500);
     }
+}
 
     /**
      * Remove the specified resource from storage.
