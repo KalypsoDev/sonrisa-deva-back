@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('customer_id');
             $table->foreign('customer_id')->references('id')->on('customers');
-            $table->integer('total_quantity');
-            $table->double('total_price', 8, 2);
+            $table->integer('total_quantity')->nullable();
+            $table->double('total_price', 8, 2)->nullable();
             $table->enum('status',['Preparing','Shipped', 'Cancelled'])->default('Preparing');
             $table->date('requested_date');
             $table->date('shipping_date')->nullable();

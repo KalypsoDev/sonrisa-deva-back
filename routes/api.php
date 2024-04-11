@@ -3,6 +3,7 @@
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\OrderProductController;
 use App\Http\Controllers\ProductController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -46,3 +47,7 @@ Route::get('/orders/{id}', [OrderController::class, 'show']);
 Route::post('/orders', [OrderController::class, 'store']);
 Route::put('/orders/shipped', [OrderController::class, 'updateShipped']);
 Route::put('/orders/cancelled', [OrderController::class, 'updateCancelled']);
+
+Route::get('/order-product', [OrderProductController::class, 'index']);
+Route::get('/order-product/{id}', [OrderProductController::class, 'show']);
+Route::post('/order-product', [OrderProductController::class, 'store']);
