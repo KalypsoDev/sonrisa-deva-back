@@ -25,7 +25,34 @@ class CustomerController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        try {
+            $request->validate([
+                'username' => 'required|string|max:255',
+                'email' => 'required|string',
+                'address' => 'required|string',
+                'telephone' => 'required|string',
+            ]);
+
+            $customer = Customer::where('email', $request->email)->first();
+
+            if ($customer) {
+                return response()->json(['message' => 'Cliente existente encontrado', 'customer' => $customer], 200);
+            }
+
+            $customer = Customer::create([
+                'username' => $request->username,
+                'email' => $request->email,
+                'address' => $request->address,
+                'telephone' => $request->telephone,
+            ]);
+
+            return response()->json([
+                'message' => 'El cliente se ha guardado correctamente',
+                'customer' => $customer,
+            ], 201);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
     /**
