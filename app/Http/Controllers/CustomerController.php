@@ -60,7 +60,17 @@ class CustomerController extends Controller
      */
     public function show(string $id)
     {
-        //
+        try {
+            $customer = Customer::find($id);
+        
+            if (!$customer) {
+                return response()->json(['error' => 'No se ha encontrado el cliente'], 404);
+            }
+        
+            return response()->json(['data' => $customer], 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Se produjo un error al procesar la solicitud: ' . $e->getMessage()], 500);
+        }
     }
 
     /**
