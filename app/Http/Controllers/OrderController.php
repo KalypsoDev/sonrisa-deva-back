@@ -68,15 +68,15 @@ class OrderController extends Controller
         try {
             $order = Order::findOrFail($id);
     
-            // Verificar si el estado se está actualizando a 'shipped' y no estaba en 'shipped' antes.
-            if ($order->status !== 'shipped' && $request->input('status') === 'shipped') {
-                foreach ($order->productOrders as $productOrder) {
-                    if ($productOrder->product->stock < $productOrder->unit_quantity) {
+            // Verificar si el estado se está actualizando a 'Shipped' y no estaba en 'Shipped' antes.
+            if ($order->status !== 'Shipped' && $request->input('status') === 'Shipped') {
+                foreach ($order->ordersProducts as $orderProduct) {
+                    if ($orderProduct->product->stock < $orderProduct->unit_quantity) {
                         return response()->json(['error' => 'No hay suficiente stock para completar este pedido'], 400);
                     }
     
                     // Restar la cantidad del stock del producto
-                    $productOrder->product->decrement('stock', $productOrder->unit_quantity);
+                    $orderProduct->product->decrement('stock', $orderProduct->unit_quantity);
                 }
                 // Actualizar el estado de la orden
                 $order->status = $request->input('status');
@@ -97,7 +97,7 @@ class OrderController extends Controller
         try {
             $order = Order::findOrFail($id);
 
-            if ($order->status === 'preparing' && $request->input('status') === 'cancelled') {
+            if ($order->status === 'Preparing' && $request->input('status') === 'Cancelled') {
 
                 // Actualizar el estado de la orden
                 $order->update([
