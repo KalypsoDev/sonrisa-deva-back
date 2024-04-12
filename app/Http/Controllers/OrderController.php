@@ -68,9 +68,8 @@ class OrderController extends Controller
             if ($order->status === 'Preparing' && $request->input('status') === 'Cancelled') {
 
                 // Actualizar el estado de la orden
-                $order->update([
-                    'status' => $request->input('status'),
-                ]);
+                $order->status = $request->input('status');
+                $order->save();
 
                 return response()->json(['success' => 'El estado del pedido ha pasado a cancelado'], 200);
             } else {
