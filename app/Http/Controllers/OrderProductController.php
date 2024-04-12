@@ -57,27 +57,48 @@ class OrderProductController extends Controller
         }
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function updateStatusAndStock(Request $request, $id)
     {
-        //
-    }
+        try {
+            $order = Order::findOrFail($id);
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
+            // Verifica si el estado de la orden no es "Shipped"
+            if ($order->status !== 'Shipped') {
+                // Actualiza el estado de la orden a "Shipped"
+                $order->status = 'Shipped';
+                $order->save();
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+                // Actualiza el stock de los productos asociados a la orden
+                foreach ($order->ordersProducts as $orderProduct) {
+                    $product = $orderProduct->product;
+
+                    // Verifica si el producto existe
+                    if ($product) {
+                        $newStock = $product->stock - $orderProduct->unit_quantity;
+
+                        // Verifica que el stock no sea negativo
+                        if ($newStock >= 0) {
+                            // Actualiza el stock del producto
+                            $product->update(['stock' => $newStock]);
+                        } else {
+                            // Si el stock es negativo, devuelve un error
+                            return response()->json(['error' => 'No hay suficiente stock para el producto'], 400);
+                        }
+                    } else {
+                        // Maneja el caso en el que el producto no existe
+                        return response()->json(['error' => 'El producto asociado no existe'], 400);
+                    }
+                }
+
+                // Devuelve una respuesta de éxito
+                return response()->json(['message' => 'Estado de la orden actualizado a "Shipped" y stock de los productos actualizado']);
+            } else {
+                // Si el estado de la orden ya es "Shipped", devuelve un error
+                return response()->json(['error' => 'La orden ya ha sido enviada'], 400);
+            }
+        } catch (\Exception $e) {
+            // Maneja cualquier excepción que pueda ocurrir durante el proceso
+            return response()->json(['error' => 'Error al procesar la solicitud: ' . $e->getMessage()], 500);
+        }
     }
 }
