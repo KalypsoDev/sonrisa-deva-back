@@ -60,38 +60,6 @@ class OrderController extends Controller
         }
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function updateShipped(Request $request, string $id)
-    {
-        try {
-            $order = Order::findOrFail($id);
-    
-            // Verificar si el estado se está actualizando a 'Shipped' y no estaba en 'Shipped' antes.
-            if ($order->status !== 'Shipped' && $request->input('status') === 'Shipped') {
-                foreach ($order->ordersProducts as $orderProduct) {
-                    if ($orderProduct->product->stock < $orderProduct->unit_quantity) {
-                        return response()->json(['error' => 'No hay suficiente stock para completar este pedido'], 400);
-                    }
-    
-                    // Restar la cantidad del stock del producto
-                    $orderProduct->product->decrement('stock', $orderProduct->unit_quantity);
-                }
-                // Actualizar el estado de la orden
-                $order->status = $request->input('status');
-                $order->save();
-        
-                return response()->json(['success' => 'El estado del pedido se ha actualizado correctamente'], 200);
-            } else {
-                return response()->json(['failure' => 'El estado del pedido no ha podido ser actualizado'], 405);
-            }
-    
-        } catch (\Exception $e) {
-            return response()->json(['error' => 'Ha ocurrido un error al actualizar el estado del pedido. Detalles: ' . $e->getMessage()], 500);
-        }
-    }
-
     public function updateCancelled(Request $request, string $id)
     {
         try {
@@ -100,9 +68,8 @@ class OrderController extends Controller
             if ($order->status === 'Preparing' && $request->input('status') === 'Cancelled') {
 
                 // Actualizar el estado de la orden
-                $order->update([
-                    'status' => $request->input('status'),
-                ]);
+                $order->status = $request->input('status');
+                $order->save();
 
                 return response()->json(['success' => 'El estado del pedido ha pasado a cancelado'], 200);
             } else {
