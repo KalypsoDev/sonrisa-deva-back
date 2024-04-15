@@ -85,20 +85,39 @@ class EventController extends Controller
     {
         try {
             $event = Event::findOrFail($id);
+
+            $url = $event->image_url;
+            $public_id = $event->public_id;
+
             $request->validate([
                 'title' => 'required|string|max:255',
-                // 'image_url' => 'required|string',
-                // 'public_id' => 'required|string',
-                'description' => 'nullable|string',
+                'image_url' => 'required|image',
                 'location' => 'required|string',
                 'collection' => 'nullable|numeric',
                 'date' => 'nullable|date',
-                'time' => 'nullable|time',
+                'hour' => 'nullable|date_format:H:i'
             ]);
 
-            $event->update($request->all());
+            if ($request->hasFile('image_url')) {
+                Cloudinary::destroy($public_id);
+                $file = $request->file('image_url');
+                $cloudinaryUpload = Cloudinary::upload($file->getRealPath(), ['folder' => 'sonrisa']);
 
-            return response()->json(['message' => 'Evento actualizado correctamente'], 200);
+                $url = $cloudinaryUpload->getSecurePath();
+                $public_id = $cloudinaryUpload->getPublicId();
+            }
+
+            $event->update([
+                "title" => $request->title,
+                "image_url" => $url,
+                "location" => $request->location,
+                "collection" => $request->collection,
+                "date" => $request->date,
+                "hour" => $request['hour'],
+                "public_id" => $public_id
+            ]);
+
+            return response()->json(['message' => 'Evento actualizado correctamente', $event], 200);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
