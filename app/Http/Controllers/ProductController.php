@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use Illuminate\Http\Request;
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 
 class ProductController extends Controller
 {
@@ -28,21 +29,29 @@ class ProductController extends Controller
                 'description' => 'nullable|string',
                 'price' => 'required|numeric',
                 'stock' => 'required|numeric',
-                // 'image_url' => 'required|string',
-                // 'public_id' => 'required|string',
+                'image_url' => 'required|image',
             ]);
 
+
+            $file = $request->file('image_url');
+            $cloudinaryUpload = Cloudinary::upload($file->getRealPath(), ['folder' => 'sonrisa']);
+
+            $public_id = $cloudinaryUpload->getPublicId();
+            $url = $cloudinaryUpload->getSecurePath();
+            
+
             $product = Product::create([
-                'name' => $request->name,
-                'description' => $request->description,
-                'price' => $request->price,
-                'stock' => $request->stock,
-                // 'image_url' => $request->image_url,
-                // 'public_id' => $request->public_id,
+                "name" => $request->name,
+                "description" => $request->description,
+                "price" => $request->price,
+                "stock" => $request->stock,
+                "image_url" => $url,
+                "public_id" => $public_id
             ]);
+
             return response()->json([
                 'message' => 'El producto se ha creado correctamente',
-                'event' => $product,
+                'product' => $product,
             ], 201);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
