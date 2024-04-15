@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Event;
 use Illuminate\Http\Request;
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 
 class EventController extends Controller
 {
@@ -28,18 +29,23 @@ class EventController extends Controller
         try {
             $request->validate([
                 'title' => 'required|string|max:255',
-                // 'image_url' => 'required|string',
-                // 'public_id' => 'required|string',
+                'image_url' => 'required|image',
                 'location' => 'required|string',
                 'collection' => 'nullable|numeric',
                 'date' => 'nullable|date',
                 'hour' => 'nullable|date_format:H:i'
             ]);
 
+            $file = $request->file('image_url');
+            $cloudinaryUpload = Cloudinary::upload($file->getRealPath(), ['folder' => 'sonrisa']);
+
+            $public_id = $cloudinaryUpload->getPublicId();
+            $url = $cloudinaryUpload->getSecurePath();
+
             $event = Event::create([
                 'title' => $request->title,
-                // 'image_url' => $request->image_url,
-                // 'public_id' => $request->public_id,
+                'image_url' => $url,
+                'public_id' => $public_id,
                 'location' => $request->location,
                 'collection' => $request->collection,
                 'date' => $request->date,
@@ -60,7 +66,7 @@ class EventController extends Controller
     public function show(string $id)
     {
         try {
-            $event = Event::find($id);
+            $event = Event::findOrFail($id);
 
             if (!$event) {
                 return response()->json(['error' => 'No se ha encontrado el evento'], 404);
@@ -79,20 +85,39 @@ class EventController extends Controller
     {
         try {
             $event = Event::findOrFail($id);
+
+            $url = $event->image_url;
+            $public_id = $event->public_id;
+
             $request->validate([
                 'title' => 'required|string|max:255',
-                // 'image_url' => 'required|string',
-                // 'public_id' => 'required|string',
-                'description' => 'nullable|string',
+                'image_url' => 'required|image',
                 'location' => 'required|string',
                 'collection' => 'nullable|numeric',
                 'date' => 'nullable|date',
-                'time' => 'nullable|time',
+                'hour' => 'nullable|date_format:H:i'
             ]);
 
-            $event->update($request->all());
+            if ($request->hasFile('image_url')) {
+                Cloudinary::destroy($public_id);
+                $file = $request->file('image_url');
+                $cloudinaryUpload = Cloudinary::upload($file->getRealPath(), ['folder' => 'sonrisa']);
 
-            return response()->json(['message' => 'Evento actualizado correctamente'], 200);
+                $url = $cloudinaryUpload->getSecurePath();
+                $public_id = $cloudinaryUpload->getPublicId();
+            }
+
+            $event->update([
+                "title" => $request->title,
+                "image_url" => $url,
+                "location" => $request->location,
+                "collection" => $request->collection,
+                "date" => $request->date,
+                "hour" => $request['hour'],
+                "public_id" => $public_id
+            ]);
+
+            return response()->json(['message' => 'Evento actualizado correctamente', $event], 200);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
