@@ -5,6 +5,7 @@ use App\Http\Controllers\EventController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\OrderProductController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\Auth\RegisteredUserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -51,3 +52,5 @@ Route::get('/order-products', [OrderProductController::class, 'index']);
 Route::get('/order-products/{id}', [OrderProductController::class, 'show']);
 Route::post('/order-products', [OrderProductController::class, 'store']);
 Route::put('/order-products/orders/{id}', [OrderProductController::class, 'updateStatusAndStock']);
+
+Route::post('/register', [RegisteredUserController::class, 'store']);
