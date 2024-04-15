@@ -62,7 +62,7 @@ class ProductController extends Controller
     public function show(string $id)
     {
         try {
-            $product = Product::find($id);
+            $product = Product::findOrFail($id);
 
             if (!$product) {
                 return response()->json(['error' => 'No se ha encontrado el producto'], 404);
