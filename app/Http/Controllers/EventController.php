@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Event;
 use Illuminate\Http\Request;
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 
 class EventController extends Controller
 {
@@ -28,18 +29,23 @@ class EventController extends Controller
         try {
             $request->validate([
                 'title' => 'required|string|max:255',
-                // 'image_url' => 'required|string',
-                // 'public_id' => 'required|string',
+                'image_url' => 'required|image',
                 'location' => 'required|string',
                 'collection' => 'nullable|numeric',
                 'date' => 'nullable|date',
                 'hour' => 'nullable|date_format:H:i'
             ]);
 
+            $file = $request->file('image_url');
+            $cloudinaryUpload = Cloudinary::upload($file->getRealPath(), ['folder' => 'sonrisa']);
+
+            $public_id = $cloudinaryUpload->getPublicId();
+            $url = $cloudinaryUpload->getSecurePath();
+
             $event = Event::create([
                 'title' => $request->title,
-                // 'image_url' => $request->image_url,
-                // 'public_id' => $request->public_id,
+                'image_url' => $url,
+                'public_id' => $public_id,
                 'location' => $request->location,
                 'collection' => $request->collection,
                 'date' => $request->date,
