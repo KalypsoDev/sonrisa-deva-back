@@ -66,7 +66,7 @@ class EventController extends Controller
     public function show(string $id)
     {
         try {
-            $event = Event::find($id);
+            $event = Event::findOrFail($id);
 
             if (!$event) {
                 return response()->json(['error' => 'No se ha encontrado el evento'], 404);
