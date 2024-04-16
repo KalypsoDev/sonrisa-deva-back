@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Event;
 use Illuminate\Http\Request;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
+use Illuminate\Support\Facades\Auth;
 
 class EventController extends Controller
 {
@@ -26,37 +27,41 @@ class EventController extends Controller
      */
     public function store(Request $request)
     {
-        try {
-            $request->validate([
-                'title' => 'required|string|max:255',
-                'image_url' => 'required|image',
-                'location' => 'required|string',
-                'collection' => 'nullable|numeric',
-                'date' => 'nullable|date',
-                'hour' => 'nullable|date_format:H:i'
-            ]);
+        if (Auth::user()) {
+            try {
+                $request->validate([
+                    'title' => 'required|string|max:255',
+                    'image_url' => 'required|image',
+                    'location' => 'required|string',
+                    'collection' => 'nullable|numeric',
+                    'date' => 'nullable|date',
+                    'hour' => 'nullable|date_format:H:i'
+                ]);
 
-            $file = $request->file('image_url');
-            $cloudinaryUpload = Cloudinary::upload($file->getRealPath(), ['folder' => 'sonrisa']);
+                $file = $request->file('image_url');
+                $cloudinaryUpload = Cloudinary::upload($file->getRealPath(), ['folder' => 'sonrisa']);
 
-            $public_id = $cloudinaryUpload->getPublicId();
-            $url = $cloudinaryUpload->getSecurePath();
+                $public_id = $cloudinaryUpload->getPublicId();
+                $url = $cloudinaryUpload->getSecurePath();
 
-            $event = Event::create([
-                'title' => $request->title,
-                'image_url' => $url,
-                'public_id' => $public_id,
-                'location' => $request->location,
-                'collection' => $request->collection,
-                'date' => $request->date,
-                'hour' => $request['hour'],
-            ]);
-            return response()->json([
-                'message' => 'El evento se ha creado correctamente',
-                'event' => $event,
-            ], 201);
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+                $event = Event::create([
+                    'title' => $request->title,
+                    'image_url' => $url,
+                    'public_id' => $public_id,
+                    'location' => $request->location,
+                    'collection' => $request->collection,
+                    'date' => $request->date,
+                    'hour' => $request['hour'],
+                ]);
+                return response()->json([
+                    'message' => 'El evento se ha creado correctamente',
+                    'event' => $event,
+                ], 201);
+            } catch (\Exception $e) {
+                return response()->json(['error' => $e->getMessage()], 500);
+            }
+        } else {
+            return response()->json(['error' => 'Usuario no autorizado'], 401);
         }
     }
 
@@ -83,43 +88,47 @@ class EventController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        try {
-            $event = Event::findOrFail($id);
+        if (Auth::user()) {
+            try {
+                $event = Event::findOrFail($id);
 
-            $url = $event->image_url;
-            $public_id = $event->public_id;
+                $url = $event->image_url;
+                $public_id = $event->public_id;
 
-            $request->validate([
-                'title' => 'required|string|max:255',
-                'image_url' => 'required|image',
-                'location' => 'required|string',
-                'collection' => 'nullable|numeric',
-                'date' => 'nullable|date',
-                'hour' => 'nullable|date_format:H:i'
-            ]);
+                $request->validate([
+                    'title' => 'required|string|max:255',
+                    'image_url' => 'required|image',
+                    'location' => 'required|string',
+                    'collection' => 'nullable|numeric',
+                    'date' => 'nullable|date',
+                    'hour' => 'nullable|date_format:H:i'
+                ]);
 
-            if ($request->hasFile('image_url')) {
-                Cloudinary::destroy($public_id);
-                $file = $request->file('image_url');
-                $cloudinaryUpload = Cloudinary::upload($file->getRealPath(), ['folder' => 'sonrisa']);
+                if ($request->hasFile('image_url')) {
+                    Cloudinary::destroy($public_id);
+                    $file = $request->file('image_url');
+                    $cloudinaryUpload = Cloudinary::upload($file->getRealPath(), ['folder' => 'sonrisa']);
 
-                $url = $cloudinaryUpload->getSecurePath();
-                $public_id = $cloudinaryUpload->getPublicId();
+                    $url = $cloudinaryUpload->getSecurePath();
+                    $public_id = $cloudinaryUpload->getPublicId();
+                }
+
+                $event->update([
+                    "title" => $request->title,
+                    "image_url" => $url,
+                    "location" => $request->location,
+                    "collection" => $request->collection,
+                    "date" => $request->date,
+                    "hour" => $request['hour'],
+                    "public_id" => $public_id
+                ]);
+
+                return response()->json(['message' => 'Evento actualizado correctamente', $event], 200);
+            } catch (\Exception $e) {
+                return response()->json(['error' => $e->getMessage()], 500);
             }
-
-            $event->update([
-                "title" => $request->title,
-                "image_url" => $url,
-                "location" => $request->location,
-                "collection" => $request->collection,
-                "date" => $request->date,
-                "hour" => $request['hour'],
-                "public_id" => $public_id
-            ]);
-
-            return response()->json(['message' => 'Evento actualizado correctamente', $event], 200);
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+        } else {
+            return response()->json(['error' => 'Usuario no autorizado'], 401);
         }
     }
 
@@ -128,18 +137,22 @@ class EventController extends Controller
      */
     public function destroy(string $id)
     {
-        try {
-            $event = Event::findOrFail($id);
+        if (Auth::user()) {
+            try {
+                $event = Event::findOrFail($id);
 
-            if (!$event) {
-                return response()->json(['message' => 'Evento no encontrado'], 404);
+                if (!$event) {
+                    return response()->json(['message' => 'Evento no encontrado'], 404);
+                }
+
+                $event->delete();
+
+                return response()->json(['message' => 'Evento eliminado correctamente'], 200);
+            } catch (\Exception $e) {
+                return response()->json(['error' => $e->getMessage()], 500);
             }
-
-            $event->delete();
-
-            return response()->json(['message' => 'Evento eliminado correctamente'], 200);
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+        } else {
+            return response()->json(['error' => 'Usuario no autorizado'], 401);
         }
     }
 }
