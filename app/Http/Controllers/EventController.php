@@ -27,7 +27,6 @@ class EventController extends Controller
      */
     public function store(Request $request)
     {
-        if (Auth::user()) {
             try {
                 $request->validate([
                     'title' => 'required|string|max:255',
@@ -60,9 +59,6 @@ class EventController extends Controller
             } catch (\Exception $e) {
                 return response()->json(['error' => $e->getMessage()], 500);
             }
-        } else {
-            return response()->json(['error' => 'Usuario no autorizado'], 401);
-        }
     }
 
     /**
@@ -88,7 +84,6 @@ class EventController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        if (Auth::user()) {
             try {
                 $event = Event::findOrFail($id);
 
@@ -127,9 +122,6 @@ class EventController extends Controller
             } catch (\Exception $e) {
                 return response()->json(['error' => $e->getMessage()], 500);
             }
-        } else {
-            return response()->json(['error' => 'Usuario no autorizado'], 401);
-        }
     }
 
     /**
@@ -137,7 +129,6 @@ class EventController extends Controller
      */
     public function destroy(string $id)
     {
-        if (Auth::user()) {
             try {
                 $event = Event::findOrFail($id);
 
@@ -151,8 +142,5 @@ class EventController extends Controller
             } catch (\Exception $e) {
                 return response()->json(['error' => $e->getMessage()], 500);
             }
-        } else {
-            return response()->json(['error' => 'Usuario no autorizado'], 401);
-        }
     }
 }

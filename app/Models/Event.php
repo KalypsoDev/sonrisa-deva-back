@@ -19,8 +19,4 @@ class Event extends Model
         }
     }
 
-    public function getDateAttribute($value)
-    {
-        return Carbon::createFromFormat('Y-m-d', $value)->format('d-m-Y');
-    }
 }
