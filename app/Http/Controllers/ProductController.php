@@ -24,7 +24,6 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-        if (Auth::user()) {
             try {
                 $request->validate([
                     'name' => 'required|string|max:255',
@@ -56,9 +55,6 @@ class ProductController extends Controller
             } catch (\Exception $e) {
                 return response()->json(['error' => $e->getMessage()], 500);
             }
-        } else {
-            return response()->json(['error' => 'Usuario no autorizado'], 401);
-        }
     }
 
     /**
@@ -84,7 +80,6 @@ class ProductController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        if (Auth::user()) {
             try {
                 $product = Product::findOrFail($id);
 
@@ -121,9 +116,6 @@ class ProductController extends Controller
             } catch (\Exception $e) {
                 return response()->json(['error' => $e->getMessage()], 500);
             }
-        } else {
-            return response()->json(['error' => 'Usuario no autorizado'], 401);
-        }
     }
 
     /**
@@ -131,7 +123,6 @@ class ProductController extends Controller
      */
     public function destroy(string $id)
     {
-        if (Auth::user()) {
             try {
                 $product = Product::findOrFail($id);
 
@@ -145,8 +136,5 @@ class ProductController extends Controller
             } catch (\Exception $e) {
                 return response()->json(['error' => $e->getMessage()], 500);
             }
-        } else {
-            return response()->json(['error' => 'Usuario no autorizado'], 401);
-        }
     }
 }
