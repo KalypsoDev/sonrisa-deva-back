@@ -85,6 +85,48 @@ class ProductControllerTest extends TestCase
         // Eliminar el producto de prueba después de la prueba
         $product->delete();
     }
+
+    public function testDestroyMethodDeletesProduct()
+    {
+        // Crear un producto de prueba manualmente en la base de datos
+        $product = Product::create([
+            'name' => 'Producto a eliminar',
+            'description' => 'Descripción del producto a eliminar',
+            'price' => 49.99,
+            'stock' => 5,
+        ]);
+
+        // Crear una instancia del controlador ProductController
+        $controller = new ProductController();
+
+        // Llamar al método `destroy` del controlador para eliminar el producto creado
+        $response = $controller->destroy($product->id);
+
+        // Verificar que la respuesta tenga un código HTTP 200 (éxito)
+        $this->assertEquals(200, $response->getStatusCode());
+
+        // Verificar que la respuesta sea un JSON válido
+        $this->assertJson($response->getContent());
+
+        // Decodificar el contenido JSON de la respuesta para analizarlo
+        $responseData = json_decode($response->getContent(), true);
+
+        // Verificar que la respuesta contenga el mensaje esperado
+        $this->assertArrayHasKey('message', $responseData);
+        $this->assertEquals('Producto eliminado correctamente', $responseData['message']);
+
+        // Verificar que el producto realmente se haya eliminado de la base de datos
+        $deletedProduct = Product::find($product->id);
+        $this->assertNull($deletedProduct, 'El producto debe haber sido eliminado de la base de datos');
+
+        // Puedes agregar más aserciones aquí si necesitas verificar otros detalles relacionados con la eliminación
+
+        // Si el producto no se ha eliminado correctamente, puedes limpiar la base de datos
+        // Eliminar el producto manualmente si aún existe
+        if ($deletedProduct) {
+            $deletedProduct->delete();
+        }
+    }
     
 }
 
