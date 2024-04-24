@@ -42,6 +42,10 @@ php artisan serve
 
 Esto iniciará el servidor. Asegúrate de que esté funcionando correctamente antes de usar la aplicación frontend.
 
+> [!IMPORTANT]  
+> Posteriormente, necesitarás asegurarte de que el servidor de frontend también esté activo. [Link al readme del frontend](https://github.com/KalypsoDev/sonrisa-deva-front/blob/main/README.md)
+
+
 
 ## 📕 Rutas
 
