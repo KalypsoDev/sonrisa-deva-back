@@ -127,6 +127,62 @@ class ProductControllerTest extends TestCase
             $deletedProduct->delete();
         }
     }
+
+    public function testUpdateMethodUpdatesProduct()
+    {
+        // Crear un producto de prueba manualmente en la base de datos
+        $product = Product::create([
+            'name' => 'Producto a actualizar',
+            'description' => 'Descripción del producto a actualizar',
+            'price' => 39.99,
+            'stock' => 10,
+        ]);
+
+        // Crear una instancia del controlador ProductController
+        $controller = new ProductController();
+
+        // Definir los datos de la solicitud para actualizar el producto
+        $requestData = [
+            'name' => 'Producto actualizado',
+            'description' => 'Nueva descripción del producto',
+            'price' => 49.99,
+            'stock' => 15,
+        ];
+
+        // Crear una instancia de Request con los datos de actualización y el ID del producto
+        $request = new Request($requestData);
+
+        // Llamar al método `update` del controlador para actualizar el producto creado
+        $response = $controller->update($request, $product->id);
+
+        // Verificar que la respuesta tenga un código HTTP 200 (éxito)
+        $this->assertEquals(200, $response->getStatusCode());
+
+        // Verificar que la respuesta sea un JSON válido
+        $this->assertJson($response->getContent());
+
+        // Decodificar el contenido JSON de la respuesta para analizarlo
+        $responseData = json_decode($response->getContent(), true);
+
+        // Verificar que la respuesta contenga el mensaje esperado
+        $this->assertArrayHasKey('message', $responseData);
+        $this->assertEquals('Producto actualizado correctamente', $responseData['message']);
+
+        // Verificar que los datos del producto se hayan actualizado correctamente en la base de datos
+        $updatedProduct = Product::find($product->id);
+        $this->assertEquals('Producto actualizado', $updatedProduct->name);
+        $this->assertEquals('Nueva descripción del producto', $updatedProduct->description);
+        $this->assertEquals(49.99, $updatedProduct->price);
+        $this->assertEquals(15, $updatedProduct->stock);
+
+        // Si el producto no se ha actualizado correctamente, puedes limpiar la base de datos
+        // Eliminar el producto manualmente si aún existe
+        if ($updatedProduct) {
+            $updatedProduct->delete();
+        }
+
+        
+    }
     
 }
 
