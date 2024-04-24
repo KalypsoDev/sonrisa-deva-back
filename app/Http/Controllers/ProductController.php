@@ -91,7 +91,7 @@ class ProductController extends Controller
                     'description' => 'nullable|string',
                     'price' => 'required|numeric',
                     'stock' => 'required|numeric',
-                    'image_url' => 'required|image',
+                    'image_url' => 'nullable|image',
                 ]);
 
                 if ($request->hasFile('image_url')) {

@@ -92,7 +92,7 @@ class EventController extends Controller
 
                 $request->validate([
                     'title' => 'required|string|max:255',
-                    'image_url' => 'required|image',
+                    'image_url' => 'nullable|image',
                     'location' => 'required|string',
                     'collection' => 'nullable|numeric',
                     'date' => 'nullable|date',
