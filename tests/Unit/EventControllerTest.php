@@ -4,14 +4,12 @@ namespace Tests\Unit;
 
 use App\Http\Controllers\EventController;
 use App\Models\Event;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Response;
 use Mockery;
 use Tests\TestCase;
 
 class EventControllerTest extends TestCase
-{
-    use RefreshDatabase; // Usar esta trait para realizar pruebas con base de datos
+{ // Usar esta trait para realizar pruebas con base de datos
 
     public function testIndexMethod()
     {
