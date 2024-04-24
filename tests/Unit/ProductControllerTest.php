@@ -4,17 +4,11 @@ namespace Tests\Unit;
 
 use App\Http\Controllers\ProductController;
 use App\Models\Product;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Http\Response;
-use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage; 
 use Illuminate\Http\Request;
 
 class ProductControllerTest extends TestCase
 {
-    use RefreshDatabase;
 
     /**
      * Test index method returns all products in JSON format.
